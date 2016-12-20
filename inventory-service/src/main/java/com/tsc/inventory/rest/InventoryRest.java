@@ -25,4 +25,6 @@ public class InventoryRest {
 		return inventoryService.getInventoryDetails(productIds);
 	}
 	
+	
+	
 }
