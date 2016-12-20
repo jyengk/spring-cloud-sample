@@ -1,10 +1,13 @@
 package com.tsc.order.client.service;
 
+import java.util.Collection;
+
 import org.springframework.stereotype.Service;
 
-import com.tsc.order.client.model.MasterOrderModel;
+import com.tsc.order.client.model.OrderPaymentModel;
+
 
 @Service
 public interface OrderService {
-	void createOrders(MasterOrderModel masterOrderModel);
+	Collection<OrderPaymentModel> createOrders(Collection<OrderPaymentModel> orderPaymentModels);
 }
