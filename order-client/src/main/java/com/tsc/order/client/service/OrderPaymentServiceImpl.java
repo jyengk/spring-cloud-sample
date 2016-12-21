@@ -1,6 +1,5 @@
 package com.tsc.order.client.service;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,11 +14,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.tsc.order.client.model.OrderModel;
 import com.tsc.order.client.model.OrderPaymentModel;
 
 @Service
-public class OrderPaymentServiceImpl implements OrderService{
+public class OrderPaymentServiceImpl extends FallbackService implements OrderService{
 	
 	static final OrderModelAssembler asemlber = new OrderModelAssembler();
 	
@@ -27,10 +27,13 @@ public class OrderPaymentServiceImpl implements OrderService{
 	RestTemplate restTemplate;
 	
 	//@Value("${order.service.id}")
-	private String url ="http://order-service/orders";
-
+	private String url = "http://order-service/orders" ;
+	
+	@HystrixCommand(fallbackMethod = "createOrdersFallBack")
 	@Override
 	public List<OrderModel> createOrders(List<OrderPaymentModel> orderPaymentModels) {
+		//Form url with the URL mapping - "http://order-service/orders" 
+		//url = url + "/orders";
 		System.out.println(">>>>> URL : " + url);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -39,29 +42,11 @@ public class OrderPaymentServiceImpl implements OrderService{
 		ResponseEntity<List<OrderModel>> rateResponse 
 		= restTemplate.exchange(url, HttpMethod.POST, requestEntity,new ParameterizedTypeReference<List<OrderModel>>() {});
 		return rateResponse.getBody();
-		
-		
-		
-		/*ResponseEntity<Object[]> responseEntity = restTemplate.getForEntity(urlGETList, Object[].class);
-		Object[] objects = responseEntity.getBody();
-		MediaType contentType = responseEntity.getHeaders().getContentType();
-		HttpStatus statusCode = responseEntity.getStatusCode();*/
-		
-		
-		/*headers.setContentType(MediaType.APPLICATION_JSON);
-		//person list
-		List<Person> personList = new ArrayList<Person>();
-		Person person = new Person();
-		person.setName("UserOne");  
-		personList.add(person);
-		//httpEnitity       
-		HttpEntity<Object> requestEntity = new HttpEntity<Object>(personList,headers);
-		ResponseEntity<List<Person>> rateResponse 
-				= restTemplate.exchange(url, HttpMethod.POST, requestEntity,new ParameterizedTypeReference<List<Person>>() {});*/
 	}
 	
 }
 
+//Assembler class to be moved to a package outside
 class OrderModelAssembler{
 	OrderModel assembleOrderModel(OrderPaymentModel orderPaymentModel){
 		OrderModel model = new OrderModel();
